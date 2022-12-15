@@ -11,7 +11,7 @@ results = dict()
 
 
 if len(argv) > 1 and argv[1]:
-    search_title = unicode()
+    search_title = str()
     search_title=argv[1].decode("utf-8")
 else:
     search_title = None
@@ -43,7 +43,7 @@ for a in foo:
             results[a.get('author').encode("utf-8")][a.get('title').encode("utf-8")] += [(a['text'].encode("utf-8"),
                                      a['location'].encode("utf-8"))]
 
-print '''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+print ('''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
 "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -51,15 +51,15 @@ print '''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
     <title>Clippings from Kindle</title>
 </head>
 <body>
-'''
+''')
 for author, work in results.iteritems():
     #print author
-    print "<h2>%s</h2>" % escape(author)
+    print ("<h2>%s</h2>" % escape(author))
     for title, location_texts in work.iteritems():
-        print "<h3>%s</h3>" % escape(title)
+        print ("<h3>%s</h3>" % escape(title))
         for text, location in location_texts:
-            print "<blockquote><p>%s (%s)</p></blockquote>" % (escape(text), escape(location))
-print "</body></html>"
+            print ("<blockquote><p>%s (%s)</p></blockquote>" % (escape(text), escape(location)))
+print ("</body></html>")
 
 
         # print "<blockquote>%s (%s, »%s«, %s)</blockquote>\n" % (a['text'].encode("utf-8"),

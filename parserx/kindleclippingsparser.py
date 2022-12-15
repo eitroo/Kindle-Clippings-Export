@@ -16,7 +16,7 @@ class KindleClippingsParser():
         self.fp = f
 
     def parse(self):
-        notes = [unicode(n.strip().decode("utf-8")) for n in (self.fp.read().split("\n=========="))]            
+        notes = [str(n.strip()) for n in (self.fp.read().split("\n=========="))]            
 
         return (self.parse_note(note) for note in notes
                 if note != '')
@@ -24,8 +24,8 @@ class KindleClippingsParser():
     def parse_note(self, note):
 
         def collect_title(n, i):
-            title = unicode()
-            iterm = n[i:].split('\r\n')[0].rfind('(')
+            title = str()
+            iterm = n[i:].split('\n')[0].rfind('(')
             for index, c in enumerate(n[i:]):
                 if c == ' ':
                     # if the next character's an '(', we've found our terminator.
@@ -40,7 +40,7 @@ class KindleClippingsParser():
                     title += c
 
         def collect_author(n, i):
-            author = unicode()
+            author = str()
             for index, c in enumerate(n[i:]):
                 if c == ')':
                     # we've got our terminator!
@@ -54,9 +54,9 @@ class KindleClippingsParser():
 
 
         def collect_note_highlight(n, i):
-            if n[i] == '\r' and n[i+1] == '\n' and n[i+2] == '-' and n[i+3] == ' ':
-                i += 4
-                note = unicode()
+            if n[i] == '\n' and n[i+1] == '-' and n[i+2] == ' ':
+                i += 3
+                note = str()
                 for index, c in enumerate(n[i:]):
                     if c == ' ':
                         #print "got end of note-highlight."
@@ -80,7 +80,7 @@ class KindleClippingsParser():
                 exit
 
         def collect_location(n, i):
-            loc = unicode()
+            loc = str()
             if n[i:][:4] == ' on ':
                 i += 4
                 for index, c in enumerate(n[i:]):
@@ -110,12 +110,12 @@ class KindleClippingsParser():
             if n[i:][:10] == ' Added on ':
                 i += 10
                 try:
-                    end = n[i:].index('\r\n\r\n')
+                    end = n[i:].index('\n\n')-10
                 except ValueError:
                     end = len(n)
                 try:
-                    date = datetime.strptime(n[i:][:end], '%A, %B %d, %Y, %I:%M %p')
-                    return date, end+i+4 # skip the two newlines
+                    date = datetime.strptime(n[i:][:end], '%A, %d %B %y %H:%M:%S')
+                    return date, end+i+12 # skip the two newlines
                 except ValueError:
                     raise self.ParseError("unable to parse date string '%s' at location %i. Around there was chars '%s'"
                                           % (n[i:][:end], i, n[i:][:4]))
@@ -126,7 +126,7 @@ class KindleClippingsParser():
         
         def collect_text(n, i):
             if not n[i:] == "<This item is copy protected>":
-                return unicode(n[i:]), len(n)
+                return str(n[i:]), len(n)
             else:
                 # damned DRM
                 return None, len(n)

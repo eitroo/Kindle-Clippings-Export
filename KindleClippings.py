@@ -3,9 +3,9 @@ import os
 import sys
 import string
 import optparse
-import Tkinter 
-import tkFileDialog
-from parser.kindleclippingsparser import KindleClippingsParser
+import tkinter 
+from tkinter import filedialog
+from parserx.kindleclippingsparser import KindleClippingsParser
 
 def main():
     # Setup options parser
@@ -28,17 +28,18 @@ def main():
             work = myclippings.titles[title]
             work.toTxt(options.outdir, options.verbose)
     elif options.format == "html":
-        print "This hasn't been implemented yet silly!"
+        print("This hasn't been implemented yet silly!")
         exit
     else:
-        raise optParse.OptionError("is not a valid output format", options.format)
+        raise optparse.OptionError("is not a valid output format", options.format)
 
 
 def ValidateOption_infile(infile):
+    print(os.getcwd())
     if not infile:
-        root = Tkinter.Tk()
+        root = tkinter.Tk()
         root.withdraw()
-        infile = tkFileDialog.askopenfilename(parent=root,title='Select your My Clippings.txt file')
+        infile = filedialog.askopenfilename(parent=root,title='Select your My Clippings.txt file')
     else:
         infile = os.path.expanduser(infile)
         if not os.path.exists(infile):
@@ -73,7 +74,7 @@ class MyClippings():
         try:
             self.titles = self.Parse(self.ReadFile())
         except IOError:
-            print "Your file could not be properly loaded.\n"
+            print("Your file could not be properly loaded.\n")
             exit
     
     
@@ -84,7 +85,7 @@ class MyClippings():
         Called from __init__()
         """
 
-        parser = KindleClippingsParser(open(self.filepath,'r'))
+        parser = KindleClippingsParser(open(self.filepath,'r', encoding="utf8"))
         return parser
 
     
@@ -136,20 +137,25 @@ class Title:
             f = open(filename,'w')
             titleline = u'Title: ' + self.title + u'\n'
             authorline = u'Author/Source: ' + self.author + u'\n\n'
-            f.write(titleline.encode('utf-8'))
-            f.write(authorline.encode('utf-8'))
+            f.write(titleline)
+            f.write(authorline)
             for clipping in self.clippings:
                 clippingtext = u''
                 if verbose:
                     clippingtext += clipping.type + u' | ' + clipping.location + u' | ' + str(clipping.date) + u'\n'
                 clippingtext += clipping.text + u'\n\n'
+
+                clippingtext = clippingtext.replace("•", "\n•")
                 try:
-                    f.write(clippingtext.encode('utf8'))
+                    f.write("---\n")
+                    if(clippingtext[0] != '\n'):
+                        f.write('\n')
+                    f.write(clippingtext)
                 except UnicodeEncodeError:
                     pass
             f.close()
         except IOError:
-            print '\nError writing file for:\n' + self.title + '\n\n'
+            print('\nError writing file for:\n' + self.title + '\n\n')
     
         
 class Clipping:
